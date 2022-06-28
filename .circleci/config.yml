@@ -90,14 +90,14 @@ jobs:
             ./gradlew jacocoTestReport --stacktrace
           working_directory: << pipeline.parameters.workingdir >>
       - store_test_results:
-          path: build/test-results/test
+          path: helloworld/build/test-results/test
           working_directory: << pipeline.parameters.workingdir >>
       - store_artifacts:
-          path: build/test-results/test
+          path: helloworld/build/test-results/test
           when: always
           working_directory: << pipeline.parameters.workingdir >>
       - store_artifacts:
-          path: build/reports/jacoco/test/html
+          path: helloworld/build/reports/jacoco/test/html
           when: always
           working_directory: << pipeline.parameters.workingdir >>
       - run:
@@ -110,7 +110,7 @@ jobs:
       # This will be empty for all nodes except the first one
           working_directory: << pipeline.parameters.workingdir >>
       - store_artifacts:
-          path: build/libs
+          path: helloworld/build/libs
           working_directory: << pipeline.parameters.workingdir >>
 workflows:
   test-with-custom-reports:
