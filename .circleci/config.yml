@@ -23,7 +23,7 @@ jobs:
       # Configure the JVM and Gradle to avoid OOM errors
       _JAVA_OPTIONS: "-Xmx3g"
       GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
-    working_directory: ~/helloworld/
+    working_directory: helloworld/
     docker:
       - image: 'cimg/openjdk:17.0.3'
     steps:
@@ -56,7 +56,7 @@ jobs:
       GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
     docker:
       - image: 'cimg/openjdk:17.0.3'
-    working_directory: ~/helloworld
+    working_directory: helloworld/
     steps:
       - checkout
       - attach_workspace:
