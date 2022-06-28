@@ -32,10 +32,10 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v1-gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+          key: v1-gradle-wrapper-{{ checksum "helloworld/gradle/wrapper/gradle-wrapper.properties" }}
           working_directory: << pipeline.parameters.workingdir >>
       - restore_cache:
-          key: v1-gradle-cache-{{ checksum "build.gradle" }}
+          key: v1-gradle-cache-{{ checksum "helloworld/build.gradle" }}
           working_directory: << pipeline.parameters.workingdir >>
       - run:
           name: Install dependencies
@@ -44,7 +44,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle/wrapper
-          key: v1-gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+          key: v1-gradle-wrapper-{{ checksum "helloworld/gradle/wrapper/gradle-wrapper.properties" }}
           working_directory: << pipeline.parameters.workingdir >>
       - save_cache:
           paths:
