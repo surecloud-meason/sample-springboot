@@ -49,7 +49,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle/caches
-          key: v1-gradle-cache-{{ checksum "build.gradle" }}
+          key: v1-gradle-cache-{{ checksum "helloworld/build.gradle" }}
           working_directory: << pipeline.parameters.workingdir >>
       - persist_to_workspace:
           root: .
