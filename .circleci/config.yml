@@ -19,8 +19,7 @@ workflows:
     jobs:
       - gradle/test:
           app_src_directory: helloworld/
-          store_artifacts: helloworld/build/reports/
-          test_command: myTests
+          reports_path: helloworld/build/reports/
           test_results_path: helloworld/build/test-results/
   say-hello-workflow:
     jobs:
