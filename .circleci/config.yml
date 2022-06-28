@@ -1,6 +1,8 @@
 orbs:
   gradle: circleci/gradle@2.2.0
 version: 2.1
+executors:
+  tag: '17.0.3'
 jobs:
   say-hello:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
