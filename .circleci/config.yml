@@ -87,7 +87,7 @@ jobs:
       - run:
           name: Generate code coverage report
           command:
-            ./gradlew jacocoTestReport
+            ./gradlew jacocoTestReport --stacktrace
           working_directory: << pipeline.parameters.workingdir >>
       - store_test_results:
           path: build/test-results/test
