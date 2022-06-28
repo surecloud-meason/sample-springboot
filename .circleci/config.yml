@@ -54,7 +54,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - build
+            - helloworld/build
   test:
     # Remove if parallelism is not desired
     parallelism: 5
