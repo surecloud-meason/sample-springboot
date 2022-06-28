@@ -84,11 +84,11 @@ jobs:
             echo "Prepared arguments for Gradle: $GRADLE_ARGS"
             ./gradlew test $GRADLE_ARGS
           working_directory: << pipeline.parameters.workingdir >>
-      - run:
-          name: Generate code coverage report
-          command:
-            ./gradlew jacocoTestReport --stacktrace
-          working_directory: << pipeline.parameters.workingdir >>
+#      - run:
+#          name: Generate code coverage report
+#          command:
+#            ./gradlew jacocoTestReport --stacktrace
+#          working_directory: << pipeline.parameters.workingdir >>
       - store_test_results:
           path: helloworld/build/test-results/test
           working_directory: << pipeline.parameters.workingdir >>
