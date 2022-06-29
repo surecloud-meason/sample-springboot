@@ -1,0 +1,131 @@
+orbs:
+  gradle: circleci/gradle@2.2.0
+version: 2.1
+parameters:
+  workingdir:
+    type: string
+    default: 'helloworld/'
+executors:
+  openjdk17:
+    docker:
+      - image: 'cimg/openjdk:17.0.3'
+jobs:
+  say-hello:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    docker:
+      - image: cimg/base:stable
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps:
+      - checkout
+      - run:
+          name: "Say hello"
+          command: "echo Hello, World!"
+  build:
+    environment:
+      # Configure the JVM and Gradle to avoid OOM errors
+      _JAVA_OPTIONS: "-Xmx3g"
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
+    docker:
+      - image: 'cimg/openjdk:17.0.3'
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-gradle-wrapper-{{ checksum "helloworld/gradle/wrapper/gradle-wrapper.properties" }}
+          working_directory: << pipeline.parameters.workingdir >>
+      - restore_cache:
+          key: v1-gradle-cache-{{ checksum "helloworld/build.gradle" }}
+          working_directory: << pipeline.parameters.workingdir >>
+      - run:
+          name: Install dependencies
+          command: ./gradlew build -x test
+          working_directory: << pipeline.parameters.workingdir >>
+      - save_cache:
+          paths:
+            - ~/.gradle/wrapper
+          key: v1-gradle-wrapper-{{ checksum "helloworld/gradle/wrapper/gradle-wrapper.properties" }}
+          working_directory: << pipeline.parameters.workingdir >>
+      - save_cache:
+          paths:
+            - ~/.gradle/caches
+          key: v1-gradle-cache-{{ checksum "helloworld/build.gradle" }}
+          working_directory: << pipeline.parameters.workingdir >>
+      - persist_to_workspace:
+          root: .
+          paths:
+            - helloworld/build
+  test:
+    # Remove if parallelism is not desired
+    parallelism: 5
+    environment:
+      # Configure the JVM and Gradle to avoid OOM errors
+      _JAVA_OPTIONS: "-Xmx3g"
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
+    docker:
+      - image: 'cimg/openjdk:17.0.3'
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Run tests in parallel
+          # Use "./gradlew test" instead if tests are not run in parallel
+          command: |
+            cd src/test/java
+            # Get list of classnames of tests that should run on this node
+            CLASSNAMES=$(circleci tests glob "**/*.java" \
+              | cut -c 1- | sed 's@/@.@g' \
+              | sed 's/.\{5\}$//' \
+              | circleci tests split --split-by=timings --timings-type=classname)
+            cd ../../..
+            # Format the arguments to "./gradlew test"
+            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
+            echo "Prepared arguments for Gradle: $GRADLE_ARGS"
+            ./gradlew test $GRADLE_ARGS
+          working_directory: << pipeline.parameters.workingdir >>
+#      - run:
+#          name: Generate code coverage report
+#          command:
+#            ./gradlew jacocoTestReport --stacktrace
+#          working_directory: << pipeline.parameters.workingdir >>
+      - store_test_results:
+          path: helloworld/build/test-results/test
+          working_directory: << pipeline.parameters.workingdir >>
+      - store_artifacts:
+          path: helloworld/build/test-results/test
+          when: always
+          working_directory: << pipeline.parameters.workingdir >>
+      - store_artifacts:
+          path: helloworld/build/reports/jacoco/test/html
+          when: always
+          working_directory: << pipeline.parameters.workingdir >>
+      - run:
+          name: Assemble JAR
+          command: |
+            # Skip this for other nodes
+            if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
+              ./gradlew assemble
+            fi
+      # This will be empty for all nodes except the first one
+          working_directory: << pipeline.parameters.workingdir >>
+      - store_artifacts:
+          path: helloworld/build/libs
+          working_directory: << pipeline.parameters.workingdir >>
+workflows:
+  test-with-custom-reports:
+    jobs:
+      - gradle/test:
+          app_src_directory: helloworld/
+          reports_path: helloworld/build/reports/
+          test_results_path: helloworld/build/test-results/
+          executor: openjdk17
+  say-hello-workflow:
+    jobs:
+      - say-hello
+  parallelised-build-and-test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
