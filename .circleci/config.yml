@@ -21,10 +21,8 @@ jobs:
       - checkout
       - restore_cache:
           key: v1-gradle-wrapper-{{ checksum "<< pipeline.parameters.workingdir >>gradle/wrapper/gradle-wrapper.properties" }}
-          working_directory: << pipeline.parameters.workingdir >>
       - restore_cache:
           key: v1-gradle-cache-{{ checksum "<< pipeline.parameters.workingdir >>build.gradle" }}
-          working_directory: << pipeline.parameters.workingdir >>
       - run:
           name: Install dependencies
           command: ./gradlew build -x test
@@ -79,15 +77,12 @@ jobs:
 #          working_directory: << pipeline.parameters.workingdir >>
       - store_test_results:
           path: << pipeline.parameters.workingdir >>build/test-results/test
-          working_directory: << pipeline.parameters.workingdir >>
       - store_artifacts:
           path: << pipeline.parameters.workingdir >>build/test-results/test
           when: always
-          working_directory: << pipeline.parameters.workingdir >>
       - store_artifacts:
           path: << pipeline.parameters.workingdir >>build/reports/jacoco/test/html
           when: always
-          working_directory: << pipeline.parameters.workingdir >>
       - run:
           name: Assemble JAR
           command: |
