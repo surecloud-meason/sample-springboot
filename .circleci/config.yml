@@ -10,18 +10,6 @@ executors:
     docker:
       - image: 'cimg/openjdk:17.0.3'
 jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
-    steps:
-      - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
   build:
     environment:
       # Configure the JVM and Gradle to avoid OOM errors
@@ -32,10 +20,10 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v1-gradle-wrapper-{{ checksum "helloworld/gradle/wrapper/gradle-wrapper.properties" }}
+          key: v1-gradle-wrapper-{{ checksum "<< pipeline.parameters.workingdir >>gradle/wrapper/gradle-wrapper.properties" }}
           working_directory: << pipeline.parameters.workingdir >>
       - restore_cache:
-          key: v1-gradle-cache-{{ checksum "helloworld/build.gradle" }}
+          key: v1-gradle-cache-{{ checksum "<< pipeline.parameters.workingdir >>build.gradle" }}
           working_directory: << pipeline.parameters.workingdir >>
       - run:
           name: Install dependencies
@@ -44,20 +32,20 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle/wrapper
-          key: v1-gradle-wrapper-{{ checksum "helloworld/gradle/wrapper/gradle-wrapper.properties" }}
+          key: v1-gradle-wrapper-{{ checksum "<< pipeline.parameters.workingdir >>gradle/wrapper/gradle-wrapper.properties" }}
           working_directory: << pipeline.parameters.workingdir >>
       - save_cache:
           paths:
             - ~/.gradle/caches
-          key: v1-gradle-cache-{{ checksum "helloworld/build.gradle" }}
+          key: v1-gradle-cache-{{ checksum "<< pipeline.parameters.workingdir >>build.gradle" }}
           working_directory: << pipeline.parameters.workingdir >>
       - persist_to_workspace:
           root: .
           paths:
-            - helloworld/build
+            - << pipeline.parameters.workingdir >>build
   test:
     # Remove if parallelism is not desired
-    parallelism: 5
+    parallelism: 2
     environment:
       # Configure the JVM and Gradle to avoid OOM errors
       _JAVA_OPTIONS: "-Xmx3g"
@@ -113,16 +101,13 @@ jobs:
           path: helloworld/build/libs
           working_directory: << pipeline.parameters.workingdir >>
 workflows:
-  test-with-custom-reports:
-    jobs:
-      - gradle/test:
-          app_src_directory: helloworld/
-          reports_path: helloworld/build/reports/
-          test_results_path: helloworld/build/test-results/
-          executor: openjdk17
-  say-hello-workflow:
-    jobs:
-      - say-hello
+#  test-with-custom-reports:
+#    jobs:
+#      - gradle/test:
+#          app_src_directory: helloworld/
+#          reports_path: helloworld/build/reports/
+#          test_results_path: helloworld/build/test-results/
+#          executor: openjdk17
   parallelised-build-and-test:
     jobs:
       - build
