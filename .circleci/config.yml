@@ -83,18 +83,18 @@ jobs:
       - store_artifacts:
           path: << pipeline.parameters.workingdir >>build/reports/jacoco/test/html
           when: always
-      - run:
-          name: Assemble JAR
-          command: |
-            # Skip this for other nodes
-            if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
-              ./gradlew assemble
-            fi
-      # This will be empty for all nodes except the first one
-          working_directory: << pipeline.parameters.workingdir >>
-      - store_artifacts:
-          path: << pipeline.parameters.workingdir >>build/libs
-          working_directory: << pipeline.parameters.workingdir >>
+#      - run:
+#          name: Assemble JAR
+#          command: |
+#            # Skip this for other nodes
+#            if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
+#              ./gradlew assemble
+#            fi
+#      # This will be empty for all nodes except the first one
+#          working_directory: << pipeline.parameters.workingdir >>
+#      - store_artifacts:
+#          path: << pipeline.parameters.workingdir >>build/libs
+#          working_directory: << pipeline.parameters.workingdir >>
 workflows:
 #  test-with-custom-reports:
 #    jobs:
